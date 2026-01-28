@@ -39,38 +39,18 @@ LOCAL_ARM_MODE := arm
 
 LOCAL_C_INCLUDES += $(MAIN_LOCAL_PATH)
 
-LOCAL_SRC_FILES 		:=  main.cpp \
-	patch/KittyMemory.cpp \
-	patch/MemoryPatch.cpp \
-    patch/MemoryBackup.cpp \
-    patch/KittyUtils.cpp \
-    Substrate/hde64.c \
-	Substrate/SubstrateDebug.cpp \
-	Substrate/SubstrateHook.cpp \
-	Substrate/SubstratePosixMemory.cpp \
-	Substrate/SymbolFinder.cpp \
-	Substrate/base64.cpp \
-    Helper/Tools.cpp \
-    Helper/ElfImg.cpp \
-    Helper/fake_dlfcn.cpp \
-    Helper/plthook_elf.cpp  \
-    Helper/ImguiPP.cpp  \
-    Helper/android_native_app_glue.c \
-    imgui/stb_image.cpp \
-    imgui/imgui.cpp \
-    imgui/imgui_draw.cpp\
-    imgui/imgui_demo.cpp \
-    imgui/imgui_tables.cpp \
-    imgui/imgui_widgets.cpp \
-    imgui/backends/imgui_impl_android.cpp \
-    imgui/backends/imgui_impl_opengl3.cpp \
-    Substrate/And64InlineHook.cpp \
-    SDK/MALIK_Basic.cpp \
-        SDK/MALIK_Basic_functions.cpp  \
-        SDK/MALIK_Engine_functions.cpp  \
-        SDK/MALIK_Client_functions.cpp   \
-        SDK/MALIK_CoreUObject_functions.cpp \
-        SDK/MALIK_ShadowTrackerExtra_functions.cpp \
+# Automatically find all source files
+FILE_LIST := $(wildcard $(LOCAL_PATH)/*.cpp)
+FILE_LIST += $(wildcard $(LOCAL_PATH)/patch/*.cpp)
+FILE_LIST += $(wildcard $(LOCAL_PATH)/Substrate/*.cpp)
+FILE_LIST += $(wildcard $(LOCAL_PATH)/Substrate/*.c)
+FILE_LIST += $(wildcard $(LOCAL_PATH)/Helper/*.cpp)
+FILE_LIST += $(wildcard $(LOCAL_PATH)/Helper/*.c)
+FILE_LIST += $(wildcard $(LOCAL_PATH)/imgui/*.cpp)
+FILE_LIST += $(wildcard $(LOCAL_PATH)/imgui/backends/*.cpp)
+FILE_LIST += $(wildcard $(LOCAL_PATH)/SDK/*.cpp)
+
+LOCAL_SRC_FILES := $(FILE_LIST:$(LOCAL_PATH)/%=%)
         
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/curl/curl-android-$(TARGET_ARCH_ABI)/include
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/curl/openssl-android-$(TARGET_ARCH_ABI)/include
