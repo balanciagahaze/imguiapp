@@ -1,0 +1,67 @@
+name: Build ImGui App
+
+on:
+  workflow_dispatch:
+    inputs:
+      code_base64:
+        description: 'Base64 encoded main.cpp content'
+        required: true
+        type: string
+      build_id:
+        description: 'Unique build identifier'
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
+    - name: Install NDK
+      run: |
+        echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973"
+        
+    - name: Decode and write main.cpp
+      run: |
+        echo "${{ github.event.inputs.code_base64 }}" | base64 -d > app/src/main/jni/main.cpp
+        echo "Code written to main.cpp"
+        head -20 app/src/main/jni/main.cpp
+        
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Build with Gradle
+      run: ./gradlew assembleDebug --no-daemon
+      
+    - name: Rename APK with build ID
+      run: |
+        mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/imguiapp-${{ github.event.inputs.build_id }}.apk
+        
+    - name: Upload APK as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: imguiapp-${{ github.event.inputs.build_id }}
+        path: app/build/outputs/apk/debug/imguiapp-${{ github.event.inputs.build_id }}.apk
+        retention-days: 1
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: build-${{ github.event.inputs.build_id }}
+        name: Build ${{ github.event.inputs.build_id }}
+        body: Automated build from ImGui Editor
+        files: app/build/outputs/apk/debug/imguiapp-${{ github.event.inputs.build_id }}.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,25 @@
+
+# Gradle
+.gradle/
+build/
+app/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Android
+.idea/
+*.iml
+local.properties
+.DS_Store
+
+# NDK
+app/src/main/obj/
+app/src/main/libs/
+*.o
+*.so
+*.a
+
+# Build intermediates
+app/build/intermediates/
+app/build/generated/
+app/build/outputs/
+app/build/tmp/

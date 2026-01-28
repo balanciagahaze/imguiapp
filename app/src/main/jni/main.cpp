@@ -1,0 +1,1957 @@
+    #include <jni.h>
+    #include <string>
+    #include <algorithm>
+    #include <string>
+    #include <vector>
+    #include <string.h>
+    #include <pthread.h>
+    #define STB_IMAGE_IMPLEMENTATION
+    #include "imgui/stb_image.h"
+	#include "imgui/imgui.h"
+	#include "imgui/backends/imgui_impl_android.h"
+	#include "imgui/backends/imgui_impl_opengl3.h"
+	#include "imgui/Font.h"
+	#include "imgui/Icon.h"
+	#include "imgui/Iconcpp.h"
+	#include "imgui/imgui_internal.h"
+	#include "imgui/Notify/ImGuiNotify.hpp"
+	#include <Helper/define.h>
+	#include "Helper/ImguiPP.h"
+	#include "Helper/fake_dlfcn.h"
+	#include "Helper/Includes.h"
+	#include "Helper/plthook.h"
+	#include "Helper/json.hpp"
+	#include "Helper/StrEnc.h"
+	#include "Helper/Spoof.h"
+	#include "Helper/Tools.h"
+	#include "Helper/Dobby/dobby.h"
+	#include "Helper/Items.h"
+	#include "Helper/Vector2.hpp"
+	#include "Helper/Vector3.hpp"
+	#include "Helper/ElfImg.h"
+	#include "Helper/Rect.h"
+	#include "Helper/Quaternion.hpp"
+	#include "Substrate/SubstrateHook.h"
+	#include "foxcheats/include/ScanEngine.hpp"
+	#include "patch/MemoryPatch.h"
+	#include "Substrate/base64.h"
+	#include "SDK.hpp"
+    using namespace SDK;
+    #define GUObject_Offset 0x9582594 //64 BIT
+    #define GNames_Offset 0x48cd030 //64 BIT
+    #define GNativeAndroidApp 0x9007104 //64 BIT
+	#define GetActorArray 0x62499e0 //64 BIT
+	#define ProcessEvent 0x5dd0a48 //64 BIT
+	#define Actors_Offset 0xA0 //64 BIT
+	
+	android_app *g_App = 0;
+
+	#include <cstring>
+	#include <string.h>
+	bool center = true;
+	bool outlined = true;
+	float accent_color[4] = { 0.300f, 0.220f, 0.750f, 1.000f };
+	#include <curl/curl.h>
+	#include <openssl/rsa.h>
+	#include <openssl/pem.h>
+
+	using json = nlohmann::json;
+	int gScreenWidth;
+	int gScreenHeight;
+// ======================================================================== //
+	#include <curl/curl.h>
+	#include <openssl/evp.h>
+	#include <openssl/pem.h>
+	#include <openssl/rsa.h>
+	#include <openssl/err.h>
+	#include <openssl/md5.h>
+	#include "Includes/VipIncludes.h"
+	#include "HUD FUNC.cpp"
+
+	#define targetLibName OBFUSCATE("libanort.so")
+	bool initImGui = false;
+	int screenWidth = -1, glWidth, screenHeight = -1, glHeight;
+	int counterWidth = 0;
+	float density = -1;
+	json items_data;
+	
+	bool Bypass = true;
+
+	bool g_Initialized = false;
+	ImGuiWindow* g_window = NULL;
+	bool bScanPatternCompleted = false;
+
+	std::string expiretime = "";
+	std::string exp_time;
+	std::string g_Token, g_Auth;
+	bool bValid = false;
+	#define SLEEP_TIME 1000LL / 120LL
+	static char s[64];
+	
+	uintptr_t UE4, ANORT;
+	uintptr_t anort;
+	
+// ======================================================================== //
+ASTExtraPlayerCharacter *localPlayer = 0;
+ASTExtraPlayerController *localPlayerController = 0;
+	
+std::map<int, bool> Items;
+std::map<int, float *> ItemColors;
+
+enum EAimTrigger {
+None = 1,
+Shooting = 2,
+Scoping = 3,
+Both = 4
+};
+
+UFont* normalFont;
+static int isMenuUi = 1;
+static int isESPUi = 1;
+static int isLineUi = 1;
+static int isAimTrigger = 1;
+bool isInfo, isLine, isBone, isBox3D, isGrenade, isAlert, isCars, isBox, isBoxItems;
+bool isAimbot, isHideFov, isAimKnocked, isAimSettings, isIgnoreBot, isAimLine, isVisCheck;
+static float isAimRecoil = 1, isAimDistance = 70, isFovSize = 25;
+bool isShowSkin;
+bool isView;
+
+float FLOAT1;
+float FLOAT2;
+float FLOAT3;
+float FLOAT4;
+// ======================================================================== //
+#define CREATE_COLOR(r, g, b, a) new float[4] {(float)r, (float)g, (float)b, (float)a};
+// ======================================================================== //
+#include "Helper/UE4.h"
+//function
+struct sRegion {
+uintptr_t start, end;
+};
+std::vector<sRegion> trapRegions;
+
+UWorld *GEWorld;
+int GWorldNum = 0;
+TUObjectArray gobjects;
+UWorld *GetWorld() {
+if(GWorldNum == 0) {
+gobjects = UObject::GUObjectArray->ObjObjects;
+for (int i=0; i< gobjects.Num(); i++)
+if (auto obj = gobjects.GetByIndex(i)) {
+if(obj->IsA(UEngine::StaticClass())) {
+auto GEngine = (UEngine *) obj;
+if (GEngine) {
+auto ViewPort = GEngine->GameViewport;
+if (ViewPort) {
+GEWorld = ViewPort->World;
+GWorldNum = i;
+return ViewPort->World;
+}
+}
+}
+}
+}else{
+auto GEngine = (UEngine *) (gobjects.GetByIndex(GWorldNum));
+if(GEngine) {
+auto ViewPort = GEngine->GameViewport;
+if(ViewPort) {
+GEWorld = ViewPort->World;
+return ViewPort->World;
+}
+}
+}
+return 0;
+}
+TNameEntryArray *GetGNames() {
+return ((TNameEntryArray *(*)()) (UE4 + GNames_Offset))();
+}
+std::vector<AActor *> getActors() {
+auto World = GetWorld();
+if (!World)
+return std::vector<AActor *>();
+auto PersistentLevel = World->PersistentLevel;
+if (!PersistentLevel)
+return std::vector<AActor *>();
+struct GovnoArray {
+uintptr_t base;
+int32_t count;
+int32_t max;
+};
+static thread_local GovnoArray Actors{};
+{
+Actors = *(((GovnoArray*(*)(uintptr_t))(UE4 + GetActorArray))(reinterpret_cast<uintptr_t>(PersistentLevel)));
+}
+if (Actors.count <= 0) {
+return {};
+}
+std::vector<AActor *> actors;
+for (int i = 0; i < Actors.count; i++) {
+auto Actor = *(uintptr_t *) (Actors.base + (i * sizeof(uintptr_t)));
+if (Actor) {
+actors.push_back(reinterpret_cast<AActor *const>(Actor));
+}
+}
+return actors;
+}
+template <class T>
+void GetAllActors(std::vector<T *> &Actors)
+{
+UGameplayStatics *gGameplayStatics = (UGameplayStatics *)gGameplayStatics->StaticClass();
+auto GWorld = GetWorld();
+if (GWorld)
+{
+TArray<AActor *> Actors2;
+gGameplayStatics->GetAllActorsOfClass((UObject *)GWorld, T::StaticClass(), &Actors2);
+for (int i = 0; i < Actors2.Num(); i++)
+{
+Actors.push_back((T *)Actors2[i]);
+}
+}
+}
+
+const char *getObjectPath(UObject *Object) {
+    std::string s;
+    for (auto super = Object->ClassPrivate; super; super = (UClass *) super->SuperStruct) {
+        if (!s.empty())
+            s += ".";
+        s += super->NamePrivate.GetName();
+    }
+    return s.c_str();
+}
+
+bool isObjectInvalid(UObject *obj) {
+    if (!Tools::IsPtrValid(obj)) {
+        return true;
+    }
+
+    if (!Tools::IsPtrValid(obj->ClassPrivate)) {
+        return true;
+    }
+
+    if (obj->InternalIndex <= 0) {
+        return true;
+    }
+
+    if (obj->NamePrivate.ComparisonIndex <= 0) {
+        return true;
+    }
+
+    if ((uintptr_t)(obj) % sizeof(uintptr_t) != 0x0 && (uintptr_t)(obj) % sizeof(uintptr_t) != 0x4) {
+        return true;
+    }
+
+    if (std::any_of(trapRegions.begin(), trapRegions.end(), [obj](sRegion region) { return ((uintptr_t) obj) >= region.start && ((uintptr_t) obj) <= region.end; }) ||
+        std::any_of(trapRegions.begin(), trapRegions.end(), [obj](sRegion region) { return ((uintptr_t) obj->ClassPrivate) >= region.start && ((uintptr_t) obj->ClassPrivate) <= region.end; })) {
+        return true;
+    }
+
+    return false;
+}
+ 
+class FPSCounter {
+protected:
+unsigned int m_fps;
+unsigned int m_fpscount;
+long m_fpsinterval;
+
+public:
+FPSCounter() : m_fps(0), m_fpscount(0), m_fpsinterval(0) {
+}
+
+void update() {
+m_fpscount++;
+
+if (m_fpsinterval < time(0)) {
+m_fps = m_fpscount;
+
+m_fpscount = 0;
+m_fpsinterval = time(0) + 1;
+}
+}
+
+unsigned int get() const {
+return m_fps;
+}
+};
+
+FPSCounter fps;
+
+auto GetTargetForAimBot() {
+    ASTExtraPlayerCharacter *result = 0;
+    float max = std::numeric_limits<float>::infinity();
+    auto Actors = getActors();
+    auto localPlayer = g_LocalPlayer;
+    auto localController = g_PlayerController;
+    if (localPlayer) {
+    for (int i = 0; i < Actors.size(); i++) {
+    auto Actor = Actors[i];
+    if (isObjectInvalid(Actor))
+    continue;
+    if (Actor->IsA(ASTExtraPlayerCharacter::StaticClass())) {
+   	auto Player = (ASTExtraPlayerCharacter *)Actor;
+	float dist = localPlayer->GetDistanceTo(Player) / 500.0f;
+    if (dist > isAimDistance) // Aimbot Meter
+    continue;
+	if (Player->PlayerKey == localPlayer->PlayerKey)
+	continue;
+	if (Player->TeamID == localPlayer->TeamID)
+	continue;
+	if (Player->bDead)
+	continue;
+    if (isAimKnocked) {
+	}else{
+    if (Player->Health == 0.0f)
+    continue;
+    }
+    if (isVisCheck) {
+    if (!localController->LineOfSightTo(Player, {0, 0, 0}, true))
+    continue;
+    }
+    if (isIgnoreBot) {
+    if (Player->bEnsure)
+    continue;
+    }
+    auto Root = Player->GetBonePos("Root", {});
+    auto Head = Player->GetBonePos("Head", {});
+    FVector2D RootSc, HeadSc;
+    if (W2S(Root, &RootSc) && W2S(Head, &HeadSc)) {
+    float height = abs(HeadSc.Y - RootSc.Y);
+    float width = height * 0.65f;
+    FVector middlePoint = {HeadSc.X + (width / 2), HeadSc.Y + (height / 2), 0};
+    if ((middlePoint.X >= 0 && middlePoint.X <= SizeXx) && (middlePoint.Y >= 0 && middlePoint.Y <= SizeYy)) { //using SizeXx + SizeYy instead of glWidth & glHeight
+    FVector2D v2Middle = FVector2D((float)(SizeXx / 2), (float)(SizeYy / 2));
+    FVector2D v2Loc = FVector2D(middlePoint.X, middlePoint.Y);
+    float dist = FVector2D::Distance(v2Middle, v2Loc);
+    float radius = isFovSize*1;
+    if (dist < radius) {
+    if (dist < max) {
+    max = dist;
+    result = Player;
+    }
+    }
+    }
+    }
+    }
+    }
+    }
+    return result;
+}
+
+#define W2S(w, s) UGameplayStatics::ProjectWorldToScreen(localPlayerController, w, true, s)
+//=======================================================//
+void RenderESP(AHUD *HUD, int SizeX, int SizeY) {
+if(Bypass){
+MemoryPatch::createWithHex("libanogs.so", 0x73618, "01 68").Modify();
+MemoryPatch::createWithHex("libanogs.so", 0x735EE, "44 F2 D1 76").Modify();
+MemoryPatch::createWithHex("libanogs.so", 0x735DC, "FB F7 AE F8").Modify();
+MemoryPatch::createWithHex("libanogs.so", 0x7365E, "02 AF").Modify();
+MemoryPatch::createWithHex("libanogs.so", 0x73680, "21 46").Modify();
+MemoryPatch::createWithHex("libanogs.so", 0x73718, "AD F5 D4 6D").Modify();
+MemoryPatch::createWithHex("libanogs.so", 0x73726, "4C F2 CE F8").Modify();
+MemoryPatch::createWithHex("libanogs.so", 0x737E0, "81 B0").Modify();
+}
+Bypass = true;
+
+if (!g_Token.empty() && !g_Auth.empty() && g_Token == g_Auth) {
+	
+	int totalEnemies = 0, totalBots = 0;
+    ASTExtraPlayerCharacter *localPlayer = 0;
+    ASTExtraPlayerController *localPlayerController = 0;
+       
+	UCanvas *DebugCanvas = HUD->DebugCanvas;
+    //UCanvas *Canvas = HUD->Canvas;
+    
+    SizeXx = SizeX;
+    SizeYy = SizeY;
+    
+    if (DebugCanvas)
+    {
+        static bool loadFont = false;
+        if (!loadFont)
+        {
+            pthread_t t;
+            pthread_create(&t, 0, LoadFont, 0);
+            loadFont = true;
+        }
+
+        if (!tslFont || !robotoTinyFont)
+            return;
+
+        UGameplayStatics *gGameplayStatics = (UGameplayStatics *)UGameplayStatics::StaticClass();
+		tslFont->LegacyFontSize = 18;
+		DrawTextCenteredWithSeparator(HUD, "Mummy Cheat Vip", {(float)SizeX / 2, 60}, COLOR_WHITE, COLOR_BLACK, tslFont, 1.f, true, false, true);
+		tslFont->LegacyFontSize = TSL_FONT_DEFAULT_SIZE;
+		
+		auto Actors = getActors();
+            for (int i = 0; i < Actors.size(); i++) {
+            auto Actor = Actors[i];
+            if (isObjectInvalid(Actor))
+            continue;
+            if (Actor->IsA(ASTExtraPlayerController::StaticClass())) {
+                localPlayerController = (ASTExtraPlayerController *) Actor;
+                break;
+            }
+		}
+
+        if (localPlayerController) {
+            for (int i = 0; i < Actors.size(); i++) {
+                auto Actor = Actors[i];
+                if (isObjectInvalid(Actor))
+                continue;
+                if (Actor->IsA(ASTExtraPlayerCharacter::StaticClass())) {
+                    if (((ASTExtraPlayerCharacter *)Actor)->PlayerKey == localPlayerController->PlayerKey) {
+                        localPlayer = (ASTExtraPlayerCharacter *)Actor;
+                        break;
+                    }
+                }
+            }
+			
+			if (isAimbot) {
+				if (isHideFov){
+				//HIDE FOV WORK
+				}else{
+				DrawCircle(HUD, (SizeX / 2), (SizeY / 2), isFovSize*1, 100, COLOR_RED);
+				}
+				ASTExtraPlayerCharacter *Target = GetTargetForAimBot();
+		    	if (Target) {
+                bool triggerOk = false;
+				if (isAimTrigger != 1) {
+				if (isAimTrigger == 2) {
+				triggerOk = localPlayer->bIsWeaponFiring;
+				} else if (isAimTrigger == 3) {
+				triggerOk = localPlayer->bIsGunADS;
+				} else if (isAimTrigger == 4) {
+				triggerOk = localPlayer->bIsWeaponFiring || localPlayer->bIsGunADS;
+				}
+				} else triggerOk = true;
+				if (triggerOk) {
+                FVector targetAimPos = Target->GetBonePos("Head", {});
+                targetAimPos.Z -= 25.0f;
+                auto WeaponManagerComponent = localPlayer->WeaponManagerComponent;
+                if (WeaponManagerComponent) {
+                auto propSlot = WeaponManagerComponent->GetCurrentUsingPropSlot();
+                if ((int)propSlot.GetValue() >= 1 && (int)propSlot.GetValue() <= 3) {
+                auto CurrentWeaponReplicated = (ASTExtraShootWeapon *)WeaponManagerComponent->CurrentWeaponReplicated;
+                if (CurrentWeaponReplicated) {
+                auto ShootWeaponComponent = CurrentWeaponReplicated->ShootWeaponComponent;
+                if (ShootWeaponComponent) {
+                UShootWeaponEntity *ShootWeaponEntityComponent = ShootWeaponComponent->ShootWeaponEntityComponent;
+                if (ShootWeaponEntityComponent) {
+                ASTExtraVehicleBase *CurrentVehicle = Target->CurrentVehicle;
+                if (CurrentVehicle) {
+                FVector LinearVelocity = CurrentVehicle->ReplicatedMovement.LinearVelocity;
+                float dist = localPlayer->GetDistanceTo(Target);
+                auto timeToTravel = dist / ShootWeaponEntityComponent->BulletFireSpeed;
+                targetAimPos = UKismetMathLibrary::Add_VectorVector(targetAimPos, UKismetMathLibrary::Multiply_VectorFloat(LinearVelocity, timeToTravel));
+                } else {
+                FVector Velocity = Target->GetVelocity();
+                float dist = localPlayer->GetDistanceTo(Target);
+                auto timeToTravel = dist / ShootWeaponEntityComponent->BulletFireSpeed;
+                targetAimPos = UKismetMathLibrary::Add_VectorVector(targetAimPos, UKismetMathLibrary::Multiply_VectorFloat(Velocity, timeToTravel));
+                }
+                if (localPlayer->bIsWeaponFiring) {
+                float dist = localPlayer->GetDistanceTo(Target) / 100.f;  
+                targetAimPos.Z -= dist * isAimRecoil;        
+                }
+                if (localPlayerController) {
+                auto ControlRotator = localPlayerController->GetControlRotation();
+                auto PlayerCameraManage = localPlayerController->PlayerCameraManager; 
+                if (PlayerCameraManage) {
+                auto aimRotation = ToRotator(localPlayerController->PlayerCameraManager->CameraCache.POV.Location,targetAimPos);
+                ClampAngles(aimRotation);
+                ControlRotator.Pitch = aimRotation.Pitch;
+                ControlRotator.Yaw = aimRotation.Yaw;
+                localPlayerController->ControlRotation = ControlRotator;
+                }
+                }
+                }
+                }
+                }
+                }
+                }
+                }
+                }
+			    }//end aimbot
+
+                if (localPlayer) {
+					for (int i = 0; i < Actors.size(); i++) {
+                    auto Actor = Actors[i];
+                    if (isObjectInvalid(Actor))
+                        continue;
+
+                    if (Actor->IsA(ASTExtraPlayerCharacter::StaticClass())) {
+						auto Player = (ASTExtraPlayerCharacter *) Actor;
+						
+						if (Player->PlayerKey == localPlayer->PlayerKey)
+							continue;
+							
+						if (Player->TeamID == localPlayer->TeamID)
+							continue;
+							
+						if (Player->bDead)
+							continue;
+							
+						if (Player->bHidden)
+							continue;
+							
+						if (!Player->Mesh)
+							continue;
+							
+						if (!Player->RootComponent)
+						    continue;
+
+                        //if (Player->Health < 0.0f || Player->Health > 100.0f) {
+                            //continue;
+                        //}
+
+                        if (Player->bEnsure)
+                    totalBots++;
+                else totalEnemies++;
+                        
+                        bool IsVisible = localPlayerController->LineOfSightTo(Player, {0, 0, 0}, true);
+                        
+                        FLinearColor ColorVisible;   
+                           
+                        if (Player->bEnsure) {
+                             ColorVisible = COLOR_WHITE;                              
+                        }
+                           
+                        if (!localPlayerController->LineOfSightTo(Player, {0, 0, 0}, true)) {
+                            ColorVisible = COLOR_RED;
+                            } else {
+                            ColorVisible = COLOR_GREEN;
+                            }
+					    	auto HeadPos = Player->GetBonePos("Head", {});
+                            ImVec2 HeadPosSC;
+                            FVector Head = GetBoneLocationByName(Player, "Head");
+                            //Head.Z += 12.5f;
+                            FVector Root = GetBoneLocationByName(Player, "Root");
+                            float Distance = Player->GetDistanceTo(localPlayer) / 100.f;
+                            if (Distance < 500.f) {
+							if (isAlert){          
+		                    bool shit = false;
+							FVector MyPosition, EnemyPosition;
+							ASTExtraVehicleBase * CurrentVehiclea = Player->CurrentVehicle;
+							if (CurrentVehiclea) {
+							MyPosition = CurrentVehiclea->RootComponent->RelativeLocation;
+							} else {
+							MyPosition = Player->RootComponent->RelativeLocation;
+							}
+							ASTExtraVehicleBase * CurrentVehicle = localPlayer->CurrentVehicle;
+							if (CurrentVehicle) {
+							EnemyPosition = CurrentVehicle->RootComponent->RelativeLocation;
+							} else {
+						    EnemyPosition = localPlayer->RootComponent->RelativeLocation;
+							}
+							FVector EntityPos = WorldToRadar(localPlayerController->PlayerCameraManager->CameraCache.POV.Rotation.Yaw, MyPosition, EnemyPosition, NULL, NULL, Vector3(SizeXx, SizeYy, 0), shit);
+							FVector angle = FVector();
+							Vector3 forward = Vector3((float)(SizeXx / 2) - EntityPos.X, (float)(SizeYy / 2) - EntityPos.Y, 0.0f);
+							VectorAnglesRadar(forward, angle);
+							const auto angle_yaw_rad = DEG2RAD(angle.Y + 180.f);
+							const auto new_point_x = (SizeXx / 2) + (40/*alert dist from me*/) / 2 * 8 * cosf(angle_yaw_rad);
+                            const auto new_point_y = (SizeYy / 2) + (40/*alert dist from me*/) / 2 * 8 * sinf(angle_yaw_rad);
+                            std::array<FVector2D, 3> TrianglePoints {
+                            FVector2D((float)new_point_x - (5.6f * (float)1.5f), new_point_y - (7.3f *1.5f)), FVector2D((float)new_point_x + (11.6f *1.5f), new_point_y), FVector2D((float)new_point_x - (5.6f *1.5f), new_point_y + (7.3f *1.5f))
+                            };
+                            RotateTriangle(TrianglePoints, angle.Y + 180.0f);
+                            DrawTriangle(HUD, TrianglePoints, 1.10, ColorVisible);
+                            }//end alert
+                            FVector2D HeadSc, RootSc;
+							FVector2D HeadPos, RootPos;
+							if (gGameplayStatics->ProjectWorldToScreen(localPlayerController, Head, false, &HeadSc) && gGameplayStatics->ProjectWorldToScreen(localPlayerController, Root, false, &RootSc)) {
+                            //start first player esp
+							if (isESPUi == 1) {
+							if (isInfo) {
+                            float CurHP = std::max(0.f, std::min(Player->Health, Player->HealthMax));
+                            float MaxHP = Player->HealthMax;
+                            float HealthPercentage = CurHP / MaxHP;
+                            FLinearColor HPColor = FLinearColor(1.0f - HealthPercentage, HealthPercentage, 0.0f, HealthPercentage); // Added alpha
+                            FVector HeadLocation = Player->GetHeadLocation(true);
+                            HeadLocation.Z += 35.f;
+                            FVector2D HeadScreenPos;
+                            if (UGameplayStatics::ProjectWorldToScreen(localPlayerController, HeadLocation, false, &HeadScreenPos)) {
+                            float BarWidth = 55.0f;
+                            float BarHeight = 4.0f;
+                            HeadScreenPos.X -= BarWidth / 2;
+                            HeadScreenPos.Y -= BarHeight * 1.5f;
+                            DrawFilledRectangle(HUD, HeadScreenPos, (CurHP * BarWidth / MaxHP), BarHeight, HPColor);
+                            DrawRectangle(HUD, HeadScreenPos, BarWidth, BarHeight, 1.5f, {0.f, 0.f, 0.f, 0.7f});
+							float lineWidth = BarWidth / 5;
+                            float lineX = HeadScreenPos.X + lineWidth;
+                            float lineYStart = HeadScreenPos.Y;
+                            float lineYEnd = HeadScreenPos.Y + BarHeight;
+                            for (int i = 0; i < 5; ++i) {
+                            DrawLine(HUD, {lineX, lineYStart}, {lineX, lineYEnd}, 1.0f, {0, 0, 0, 1.0f});
+                            lineX += lineWidth;
+                            }
+                            }
+                            }//end health esp 1 / info
+							if (isInfo) {
+							tslFont->LegacyFontSize = 13;
+                            std::string MyStdString = std::to_string((int)Distance) +" M";
+                            DrawInfoText(HUD, FString(MyStdString.c_str()), {RootSc.X,RootSc.Y + 20.0f}, COLOR_YELLOW, COLOR_BLACK, true);
+                            if(!Player->bEnsure) {
+                            DrawInfoText(HUD, Player->PlayerName, {RootSc.X,RootSc.Y + 40.0f}, COLOR_YELLOW, COLOR_BLACK, true);
+                            } else {
+                            DrawInfoText(HUD, FString("Bot"), {RootSc.X,RootSc.Y + 40.0f}, COLOR_YELLOW, COLOR_BLACK, true);
+                            }
+                            tslFont->LegacyFontSize = TSL_FONT_DEFAULT_SIZE;
+							}//end name esp 1 / distance esp 1 / info
+							if (isInfo) {
+							auto AboveHead = Player->GetHeadLocation(true);
+							AboveHead.Z += 35.f;
+							FVector2D AboveHeadSc;
+							if (gGameplayStatics->ProjectWorldToScreen(localPlayerController,AboveHead, false,&AboveHeadSc)) {
+							std::wstring ws;
+							ws = std::to_wstring(Player->TeamID);
+							tslFont->LegacyFontSize = fmax(5, 12 - (int)(Distance / 80));
+							float txtWidth, txtHeight;
+							HUD->GetTextSize(Player->PlayerName, tslFont, 1.f, &txtWidth, &txtHeight);
+							DrawInfoText(HUD, ws, FVector2D(AboveHeadSc.X, AboveHeadSc.Y - txtHeight), COLOR_YELLOW, COLOR_BLACK, true);
+							}
+							}//end teamid esp 1 / info
+							}//end first esp ui
+							//start second player esp
+							if (isESPUi == 2) {
+							if (isInfo) {
+                            float CurHP = std::max(0.f, std::min(Player->Health, Player->HealthMax));
+                            float MaxHP = Player->HealthMax;
+                            float HealthPercentage = CurHP / MaxHP;
+                            FLinearColor HPColor = FLinearColor(1.0f - HealthPercentage, HealthPercentage, 0.0f, HealthPercentage); // Added alpha
+                            FVector HeadLocation = Player->GetHeadLocation(true);
+                            HeadLocation.Z += 35.f;
+                            FVector2D HeadScreenPos;
+                            if (UGameplayStatics::ProjectWorldToScreen(localPlayerController, HeadLocation, false, &HeadScreenPos)) {
+                            float BarWidth = 85;
+                            float BarHeight = 17;
+                            HeadScreenPos.X -= BarWidth / 2;
+                            HeadScreenPos.Y -= BarHeight * 1.5f;
+							if(!Player->bEnsure) {
+							DrawFilledRectangle(HUD, {HeadScreenPos.X, HeadScreenPos.Y}, (CurHP * BarWidth / MaxHP), BarHeight, COLOR_RED);
+							} else {
+							DrawFilledRectangle(HUD, {HeadScreenPos.X, HeadScreenPos.Y}, (CurHP * BarWidth / MaxHP), BarHeight, COLOR_GREEN);
+							}
+                            }
+                            }//end health esp 2 / info
+							if (isInfo) {
+							auto AboveHead = Player->GetHeadLocation(true);
+                            AboveHead.Z += 35.f;
+                            FVector2D AboveHeadSc;
+					    	if (gGameplayStatics->ProjectWorldToScreen(localPlayerController,AboveHead, false,&AboveHeadSc)) {
+							std::wstring ws;
+							std::wstring s;
+							//team id
+					     	ws += L"[";
+                            ws += std::to_wstring(Player->TeamID);
+                            ws += L"]";
+							//distance
+							s += L"[";
+							s += std::to_wstring((int) Distance);
+						    s += L"]";
+							tslFont->LegacyFontSize = fmax(5, 12 - (int)(Distance / 80));
+                            float txtWidth, txtHeight;
+                            HUD->GetTextSize(Player->PlayerName, tslFont, 1.f, &txtWidth, &txtHeight);
+                            DrawInfoText(HUD, s, FVector2D(AboveHeadSc.X + 20, AboveHeadSc.Y - 40), COLOR_YELLOW, COLOR_BLACK, true);
+							DrawInfoText(HUD, ws, FVector2D(AboveHeadSc.X - 30, AboveHeadSc.Y - 40), COLOR_GREEN, COLOR_BLACK, true);
+						    }
+							}//end teamid esp 2 / distance esp 2 / info
+							if (isInfo) {
+							auto AboveHead = Player->GetHeadLocation(true);
+                            AboveHead.Z += 35.f;
+                            FVector2D AboveHeadSc;
+							if (gGameplayStatics->ProjectWorldToScreen(localPlayerController,AboveHead, false,&AboveHeadSc)) {
+							tslFont->LegacyFontSize = fmax(5, 11 - (int)(Distance / 80));
+							float txtWidth, txtHeight;
+                            HUD->GetTextSize(Player->PlayerName, tslFont, 1.f, &txtWidth, &txtHeight);
+                            if(!Player->bEnsure) {
+                            DrawInfoText(HUD, Player->PlayerName, {AboveHeadSc.X, AboveHeadSc.Y - txtHeight}, COLOR_WHITE, COLOR_BLACK, true);
+                            } else {
+                            DrawInfoText(HUD, FString("Bot"), {AboveHeadSc.X, AboveHeadSc.Y - txtHeight}, COLOR_WHITE, COLOR_BLACK, true);
+                            }
+                            tslFont->LegacyFontSize = TSL_FONT_DEFAULT_SIZE;
+							}
+							}//end name esp 2 / info
+							if (isInfo) {
+				            auto WeaponManagerComponent = Player->WeaponManagerComponent;
+			            	if (WeaponManagerComponent) {
+                            auto CurrentWeaponReplicated = (ASTExtraShootWeapon *) WeaponManagerComponent->CurrentWeaponReplicated;
+			              	if (CurrentWeaponReplicated) {
+                            auto Maxbullet = CurrentWeaponReplicated->CurMaxBulletNumInOneClip;
+                            auto CurNum = CurrentWeaponReplicated->CurBulletNumInClip;
+                            auto Weapond = CurrentWeaponReplicated -> WeaponEntityComp -> WeaponId;                       
+                            auto CurrentWeaponReplicated = (ASTExtraShootWeapon *)WeaponManagerComponent->CurrentWeaponReplicated;
+			            	if (CurrentWeaponReplicated) {
+                            auto WeaponId = (int)CurrentWeaponReplicated->GetWeaponID();
+                            if (WeaponId) {
+                            std::string s;
+                            s += CurrentWeaponReplicated->GetWeaponName().ToString();
+                            auto AboveHead = Player->GetHeadLocation(true);
+                            AboveHead.Z += 35.f;
+                            FVector2D AboveHeadSc;
+							if (gGameplayStatics->ProjectWorldToScreen(localPlayerController,AboveHead, false,&AboveHeadSc)) {
+							tslFont->LegacyFontSize = fmax(5, 11 - (int)(Distance / 80));
+							float txtWidth, txtHeight;
+                            HUD->GetTextSize(Player->PlayerName, tslFont, 1.f, &txtWidth, &txtHeight);
+							DrawInfoText(HUD, s, FVector2D(AboveHeadSc.X, AboveHeadSc.Y), COLOR_BLUE_SKY, COLOR_BLACK, true);
+				     		tslFont->LegacyFontSize = TSL_FONT_DEFAULT_SIZE;
+                            }
+                            }
+                            }
+                            }
+							}
+							}//end player weapon esp
+							}//end second esp ui
+							if (isLine) {
+							if (isLineUi == 1) {
+							//360
+							}
+							if (isLineUi == 2) {
+							auto AboveHead = Player->GetHeadLocation(true);
+                            AboveHead.Z += 35.f;
+                            FVector2D AboveHeadSc;
+							if (gGameplayStatics->ProjectWorldToScreen(localPlayerController,AboveHead, false,&AboveHeadSc)) {
+							DrawLine(HUD, FVector2D(static_cast<float>(SizeX / 2), 0), FVector2D(AboveHeadSc.X, AboveHeadSc.Y - 40), 1.0f, ColorVisible);
+							}
+							}
+                            }//end line
+							if (isBone) {
+							static std::vector<std::string> right_arm{"neck_01", "clavicle_r", "upperarm_r", "lowerarm_r", "hand_r", "item_r"};
+                            static std::vector<std::string> left_arm{"neck_01", "clavicle_l", "upperarm_l", "lowerarm_l", "hand_l", "item_l"};
+                            static std::vector<std::string> spine{"Head", "neck_01", "spine_03", "spine_02", "spine_01", "Pelvis"};
+                            static std::vector<std::string> lower_right{"Pelvis", "thigh_r", "calf_r", "foot_r"};
+                            static std::vector<std::string> lower_left{"Pelvis", "thigh_l", "calf_l", "foot_l"};
+                            static std::vector<std::vector<std::string>> skeleton{right_arm, left_arm, spine, lower_right, lower_left};
+                            for (auto &boneStructure : skeleton) {
+                            std::string lastBone;
+                            for (std::string &currentBone : boneStructure) {
+                            if (!lastBone.empty()) {
+                            ImVec2 boneFrom, boneTo;
+                            if (W2S(Player->GetBonePos(lastBone.c_str(), {}), (FVector2D *)&boneFrom) && W2S(Player->GetBonePos(currentBone.c_str(), {}), (FVector2D *)&boneTo)) {
+                            bool isVisible = localPlayerController->LineOfSightTo(localPlayerController->PlayerCameraManager, Player->GetBonePos(currentBone.c_str(), {}), true);
+                            if (isVisible) {
+							HUD->DrawLine(boneFrom.x, boneFrom.y, boneTo.x, boneTo.y, COLOR_GREEN, 1.0f);
+							}else{
+							HUD->DrawLine(boneFrom.x, boneFrom.y, boneTo.x, boneTo.y, COLOR_RED, 1.0f);
+							}
+                            }
+                            }
+                            lastBone = currentBone;
+                            }
+                            }
+							}//end bone
+							if (isBox3D){
+							FVector BoxSize;
+                            BoxSize.X = 100.f; // Height
+                            BoxSize.Y = 100.f; // Front
+                            BoxSize.Z = 180.f; // Height
+							Box3D(HUD, Player->K2_GetActorLocation(), BoxSize, ColorVisible, 1);
+							}//end box
+                            }//end player esp
+                            }
+                            }
+							if (isBox) {
+							if (Actors[i]->IsA(APickUpListWrapperActor::StaticClass())) {
+                            auto PickUpDataList = (APickUpListWrapperActor *) Actors[i];  
+							auto PickUpDataListt = (TArray<FPickUpItemData>) PickUpDataList->GetDataList();
+                            if (!PickUpDataList->RootComponent)
+                            continue;
+                            float Distance = PickUpDataList->GetDistanceTo(localPlayer) / 100.f;
+                            FVector2D PickUpListsPos;
+                            if (Distance <= 50) {
+                            if (W2S(PickUpDataList->K2_GetActorLocation(), &PickUpListsPos)) {
+                            std::string s = "Box";
+                            s += " - ";
+                            s += std::to_string((int) Distance);
+                            s += "M";
+                            tslFont->LegacyFontSize = std::max(5, 15 - (int) (Distance / 100));
+                            DrawInfoText(HUD, FString(s), PickUpListsPos, COLOR_WHITE, COLOR_BLACK, true);
+                            tslFont->LegacyFontSize = TSL_FONT_DEFAULT_SIZE;
+							if (isBoxItems)  {
+                            if (Distance <= 10) {
+                            auto mWidthScale = std::min(0.1f * Distance, 35.f);
+                            auto boxWidth = 75.f - mWidthScale;
+                            auto boxHeight = boxWidth * 0.200f;
+                            Rect PlayerRect(PickUpListsPos.X - (boxWidth / 2), PickUpListsPos.Y, boxWidth, boxHeight);       
+					        float posY = PickUpListsPos.Y - (PlayerRect.height * 1.00f);
+                            for (int j = 0; j < PickUpDataListt.Num(); j++) {
+                            std::vector<std::string> s2;
+                            std::string itm;
+							uint32_t tc = 0xFF000000;
+                            for (auto &category : items_data) {
+                            for (auto &item : category["Items"]) {
+                            if (item["itemId"] == PickUpDataListt[j].ID.TypeSpecificID) {
+                            //itm += "[ ";
+                            //itm += item["itemClass"].get<std::string>();
+                            //itm += " ] ";
+                            itm += item["itemName"].get<std::string>();
+					        tc = strtoul(item["itemTextColor"].get<std::string>().c_str(), 0, 16);
+                            s2.push_back(itm);
+                            break;
+                            }
+                            }
+                            }
+                            if (!s2.empty())  {
+                            if (PickUpDataList[j].Count > 1){
+                            s2.push_back(" * ");
+                            s2.push_back(std::to_string(PickUpDataList[j].Count));
+                            }
+                            std::string s3;
+                            for (auto &s4 : s2)   {
+                            s3 += s4;
+                            }
+							tslFont->LegacyFontSize = std::max(5, 10 - (int) (Distance / 100));
+							DrawInfoText(HUD, FString(s3.c_str()), {PickUpListsPos.X, posY}, COLOR_WHITE, COLOR_BLACK, true);
+							tslFont->LegacyFontSize = TSL_FONT_DEFAULT_SIZE;
+                            posY -= PlayerRect.height * 1.00f;
+                            }
+                            }
+                            }	
+                            }
+                            }
+                            }
+                            }
+							}//end box
+						    if (isCars) {
+                            if (Actors[i]->IsA(ASTExtraVehicleBase::StaticClass())) {
+                            auto Vehicle = (ASTExtraVehicleBase *)Actors[i];
+                            if (!Vehicle->Mesh || !Vehicle->RootComponent)
+                            continue;;
+                            float Distance = Vehicle->GetDistanceTo(localPlayer) / 100.f;
+                            FVector2D vehiclePos;
+                            if (UGameplayStatics::ProjectWorldToScreen(localPlayerController, Vehicle->RootComponent->RelativeLocation, false, &vehiclePos)) {
+                            std::string s = GetVehicleName(Vehicle);
+                            s += " [" + std::to_string((int) Distance) + "m]";
+                            tslFont->LegacyFontSize = 8;
+                            DrawInfoText(HUD, FString(s), FVector2D(vehiclePos.X, vehiclePos.Y), COLOR_RED, COLOR_BLACK, true);
+                            }
+                            }
+                            }//end vehicle
+					    	if (isGrenade) {
+						    if (Actors[i]->IsA(ASTExtraGrenadeBase::StaticClass())) {
+							auto Grenade = (ASTExtraGrenadeBase *) Actors[i];
+							auto RootComponent = Grenade->RootComponent;
+							if (!RootComponent)
+							continue;
+							float Distance = Grenade->GetDistanceTo(localPlayer) / 70.f;
+							FVector2D grenadePos;
+							if (Distance <= 50.f) {
+							if (W2S(Grenade->K2_GetActorLocation(), & grenadePos)) {
+							std::string s;
+							auto resa = getObjectPath(Grenade);
+							if (strstr(resa, "BP_Grenade_Shoulei_C")){
+							s += "Grenade | ";
+							}
+							if (strstr(resa, "BP_Grenade_Burn_C")){
+							s += "Molotove | ";
+							}
+							if (strstr(resa, "BP_Grenade_Smoke_C")){
+							s += "Smoke | ";
+							}
+							if (strstr(resa, "BP_Grenade_Stun_C")){
+							s += "Stun | ";
+							}
+							s += std::to_string((int) Distance);
+							s += " m";
+							if (strstr(resa, "BP_Grenade_Shoulei_C")){
+							tslFont->LegacyFontSize = 15;
+							DrawTextCenteredWithSeparator(HUD, "GRENADE WARNING..!", {(float)SizeX / 2, 125}, COLOR_WHITE, COLOR_BLACK, tslFont, 1.f, true, false, true);
+							tslFont->LegacyFontSize = TSL_FONT_DEFAULT_SIZE;
+							}//end grenade warn
+							if (strstr(resa, "BP_Grenade_Burn_C")){
+							tslFont->LegacyFontSize = 15;
+							DrawTextCenteredWithSeparator(HUD, "MOLOTOVE WARNING..!", {(float)SizeX / 2, 150}, COLOR_WHITE, COLOR_BLACK, tslFont, 1.f, true, false, true);
+							tslFont->LegacyFontSize = TSL_FONT_DEFAULT_SIZE;
+							} //end molotove warn
+							tslFont->LegacyFontSize = 10;
+							DrawInfoText(HUD, FString(s.c_str()), {grenadePos.X - 10, grenadePos.Y - 10}, COLOR_YELLOW, COLOR_BLACK, true);
+							tslFont->LegacyFontSize = TSL_FONT_DEFAULT_SIZE;
+							}
+							}
+					     	}
+					    }//end grenade / molotove / smoke / stun
+                    }
+                }
+            } 
+        }
+std::string s;
+s += "Player:";
+s += " [";
+s += std::to_string(totalEnemies);
+s += "]";
+s += " | ";
+s += "Bot";
+s += " [";
+s += std::to_string(totalBots);
+s += "]";
+tslFont->LegacyFontSize = 18;
+DrawTextCenteredWithSeparator(HUD, s, {(float)SizeX / 2, 90}, COLOR_RED, COLOR_BLACK, tslFont, 1.f, true, false, true);
+tslFont->LegacyFontSize = TSL_FONT_DEFAULT_SIZE;
+g_LocalPlayer = localPlayer;
+g_PlayerController = localPlayerController;
+}//G_auth
+}//Render Esp
+// ======================================================================== //
+
+int PlaySoundYaserMod(const char* url) {
+    JavaVM* java_vm = g_App->activity->vm;
+    JNIEnv* java_env = NULL;
+    jint jni_return = java_vm->GetEnv((void**)&java_env, JNI_VERSION_1_6);
+    if (jni_return == JNI_EDETACHED) {
+    if (java_vm->AttachCurrentThread(&java_env, NULL) != JNI_OK) {
+        return -1;
+    }
+    } else if (jni_return == JNI_EVERSION) {
+        return -1;
+    }
+    jclass sound = java_env->FindClass("android/media/MediaPlayer");
+    if (sound == NULL) {
+        return -3;
+    }
+    jmethodID create_method_id = java_env->GetMethodID(sound, "<init>", "()V");
+    if (create_method_id == NULL) {
+        return -4;
+    }
+    jobject media_player_obj = java_env->NewObject(sound, create_method_id);
+    if (media_player_obj == NULL) {
+        return -5;
+    }
+    jmethodID set_data_source_method_id = java_env->GetMethodID(sound, "setDataSource", "(Ljava/lang/String;)V");
+    if (set_data_source_method_id == NULL) {
+        return -6;
+    }
+    jstring url_str = java_env->NewStringUTF(url);
+    java_env->CallVoidMethod(media_player_obj, set_data_source_method_id, url_str);
+    jmethodID prepare_method_id = java_env->GetMethodID(sound, "prepare", "()V");
+    if (prepare_method_id == NULL) {
+        return -7;
+    }
+    java_env->CallVoidMethod(media_player_obj, prepare_method_id);
+    jmethodID start_method_id = java_env->GetMethodID(sound, "start", "()V");
+    if (start_method_id == NULL) {
+        return -8;
+    }
+    java_env->CallVoidMethod(media_player_obj, start_method_id);
+    java_env->DeleteLocalRef(sound);
+    java_env->DeleteLocalRef(media_player_obj);
+    java_env->DeleteLocalRef(url_str);
+    if (java_vm->DetachCurrentThread() != JNI_OK) {
+        return -1;
+    }
+    return 0;
+}
+	extern "C" {
+		JNIEXPORT void JNICALL Java_com_xelahot_pubgm_GLES3JNIView_init(JNIEnv* env, jclass cls);
+        JNIEXPORT void JNICALL Java_com_xelahot_pubgm_GLES3JNIView_resize(JNIEnv* env, jobject obj, jint width, jint height);
+        JNIEXPORT void JNICALL Java_com_xelahot_pubgm_GLES3JNIView_step(JNIEnv* env, jobject obj);
+	    JNIEXPORT void JNICALL Java_com_xelahot_pubgm_GLES3JNIView_imgui_Shutdown(JNIEnv* env, jobject obj);
+	    JNIEXPORT void JNICALL Java_com_xelahot_pubgm_GLES3JNIView_MotionEventClick(JNIEnv* env, jobject obj,jboolean down,jfloat PosX,jfloat PosY);
+	    JNIEXPORT jstring JNICALL Java_com_xelahot_pubgm_GLES3JNIView_getWindowRect(JNIEnv *env, jobject thiz);
+	    JNIEXPORT void JNICALL Java_com_xelahot_pubgm_GLES3JNIView_real(JNIEnv* env, jobject obj, jint width, jint height);
+	};
+	
+	void HueText(const char* text, ImVec4 color)
+{
+    static auto start_time = std::chrono::high_resolution_clock::now(); // Get the current time
+    auto elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time).count() / 1000.0f; // Calculate the time elapsed since the start time in seconds
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.11f, 0.11f, 0.11f, 1.00f)); // Set the text color to be transparent
+    for (int i = 0; i < strlen(text); i++)
+    {
+        ImGui::SameLine(); // Put each character on the same line
+        float t = fmodf(elapsed_seconds + (float)i / (float)strlen(text), 1.0f); // Calculate the progress of the color change from 0 to 1, wrapping around at 1
+        ImVec4 currentColor = ImVec4(color.x * t, color.y * t, color.z * t, color.w); // Calculate the current color for this character
+        ImGui::PushStyleColor(ImGuiCol_Text, currentColor); // Change the text color for this character
+        ImGui::Text("%c", text[i]); // Draw the character
+        ImGui::PopStyleColor(); // Reset the text color
+    }
+    ImGui::PopStyleColor(); // Reset the transparent text color
+}
+
+namespace Settings
+{
+    static int Tab = 1;
+    static int skinnn = 0;
+}
+	
+	ImVec4 to_vec4(float r, float g, float b, float a) {
+    return ImVec4(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
+    }
+
+    JNIEXPORT void JNICALL Java_com_xelahot_pubgm_GLES3JNIView_init(JNIEnv* env, jclass cls) {
+
+		if (g_Initialized) 
+			return ;
+			
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO & io = ImGui::GetIO();
+		io.IniFilename = NULL;
+
+		ImGui::CreateContext();
+		ImGuiStyle& style = ImGui::GetStyle();	
+	//style.WindowRounding = 9.0f;
+	style.FrameRounding = 4.0f;
+	style.WindowTitleAlign = ImVec2(0.5f, 0.5f);
+	style.TabRounding = 0.0f;
+	style.ScrollbarSize = 10.0f;
+    style.ScrollbarRounding = 9.0f;
+	ImVec4* colors = style.Colors;
+
+
+
+
+	style.Colors[ImGuiCol_WindowBg] = ImColor(0, 0, 0, 235);
+	style.Colors[ImGuiCol_Border] = ImColor(50, 50, 50, 255);
+	style.Colors[ImGuiCol_FrameBg] = ImColor(66, 66, 66, 66);
+	style.Colors[ImGuiCol_FrameBgHovered] = ImColor(158, 158, 158, 158);
+	style.Colors[ImGuiCol_FrameBgActive] = ImColor(33, 33, 33, 33);
+	style.Colors[ImGuiCol_TitleBg] = ImColor(0, 0, 0, 255);
+	style.Colors[ImGuiCol_TitleBgCollapsed] = ImColor(0, 0, 0, 255);
+	style.Colors[ImGuiCol_TitleBgActive] = ImColor(0, 0, 0, 255);
+	style.Colors[ImGuiCol_CheckMark] = ImColor(255, 255, 255, 255);
+	style.Colors[ImGuiCol_MenuBarBg] = ImColor(66, 66, 66, 250);
+	style.Colors[ImGuiCol_SliderGrab] = ImColor(61, 133, 224, 250);
+	style.Colors[ImGuiCol_SliderGrabActive] = ImColor(61, 133, 224, 250);
+	style.Colors[ImGuiCol_Text] = ImVec4(1.000f, 1.000f, 1.000f, 1.000f);
+	style.Colors[ImGuiCol_Header] = ImColor(66, 66, 66, 66);
+	style.Colors[ImGuiCol_HeaderHovered] = ImColor(158, 158, 158, 158);
+	style.Colors[ImGuiCol_HeaderActive] = ImColor(33, 33, 33, 33);
+	colors[ImGuiCol_SliderGrabActive] = ImColor(61, 133, 224, 250);
+	style.Colors[ImGuiCol_Button] = ImColor(66, 66, 66, 66);
+	style.Colors[ImGuiCol_ButtonHovered] = ImColor(158, 158, 158, 158);
+	style.Colors[ImGuiCol_ButtonActive] = ImColor(33, 33, 33, 33);
+
+	colors[ImGuiCol_Separator] = ImColor(66, 66, 76, 200);//66 66 76
+	colors[ImGuiCol_SeparatorHovered] = ImColor(25, 83, 152, 200);
+	colors[ImGuiCol_SeparatorActive] = ImColor(26, 102, 191, 200);
+
+	colors[ImGuiCol_ResizeGrip] = ImColor(66, 66, 66, 66);
+	colors[ImGuiCol_ResizeGripHovered] = ImColor(158, 158, 158, 158);
+	colors[ImGuiCol_ResizeGripActive] = ImColor(33, 33, 33, 33);
+	style.Colors[ImGuiCol_PlotHistogram] = ImColor(66, 66, 66, 66);
+	style.Colors[ImGuiCol_PlotHistogramHovered] = ImColor(158, 158, 158, 158);
+	style.Colors[ImGuiCol_PlotLinesHovered] = ImColor(158, 158, 158, 158);
+	style.Colors[ImGuiCol_PlotLines] = ImColor(66, 66, 66, 66);
+	style.Colors[ImGuiCol_Tab] = ImColor(66, 66, 66, 66);
+	style.Colors[ImGuiCol_TabHovered] = ImColor(158, 158, 158, 158);
+	style.Colors[ImGuiCol_TabActive] = ImColor(33, 33, 33, 33);
+
+
+	style.Colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+	style.Colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
+	style.Colors[ImGuiCol_BorderShadow] = ImVec4(1.00f, 0.20f, 0.30f, 0.10f);
+	style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
+	style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
+	style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
+	style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
+	style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.51f, 0.51f, 0.51f, 1.00f);
+	style.Colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
+	style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
+	style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+	style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+	style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
+	style.Colors[ImGuiCol_DragDropTarget] = ImVec4(1.00f, 1.00f, 0.00f, 0.90f);
+	style.Colors[ImGuiCol_NavHighlight] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+	style.Colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
+	style.Colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
+	style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
+        io.IniFilename = NULL;
+	    io.ConfigWindowsMoveFromTitleBarOnly = true;
+
+		ImGui_ImplAndroid_Init();
+		ImGui_ImplOpenGL3_Init(OBFUSCATE("#version 300 es"));
+
+		static const ImWchar icons_ranges[] = { 0xf000, 0xf3ff, 0 };
+        ImFontConfig icons_config;
+
+        ImFontConfig CustomFont;
+        CustomFont.FontDataOwnedByAtlas = false;
+
+        icons_config.MergeMode = true;
+        icons_config.PixelSnapH = true;
+        icons_config.OversampleH = 2.5;
+        icons_config.OversampleV = 2.5;
+	
+	    io.FontGlobalScale = 1.2f;
+	
+        io.Fonts->AddFontFromMemoryTTF(const_cast<std::uint8_t*>(Custom), sizeof(Custom), 30.f, &CustomFont);
+        io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_data, font_awesome_size, 30.0f, &icons_config, icons_ranges);
+		LOGO图片 = 读取图片(悬浮图片, sizeof(悬浮图片));
+		
+        ImFontConfig font_cfg;
+        font_cfg.SizePixels = 20.0f;
+        io.Fonts->AddFontDefault(&font_cfg);
+        ImGui::GetStyle().ScaleAllSizes(3.0f); 
+    
+        g_Initialized=true;
+}
+
+
+	JNIEXPORT void JNICALL
+	Java_com_xelahot_pubgm_GLES3JNIView_resize(JNIEnv* env, jobject obj, jint width, jint height) {
+		glWidth = (int) width;
+		glHeight = (int) height;
+		glViewport(0, 0, width, height);
+		ImGuiIO & io = ImGui::GetIO();
+		io.ConfigWindowsMoveFromTitleBarOnly = false;
+		io.IniFilename = NULL;
+		ImGui::GetIO().DisplaySize = ImVec2((float)width, (float)height);
+	}
+	
+	static bool show = true;
+	
+	void Particles()
+{
+    
+    ImVec2 screen_size = ImVec2(glWidth, glHeight);
+    static ImVec2 partile_pos[100];
+    static ImVec2 partile_target_pos[100];
+    static float partile_speed[100];
+    static float partile_radius[100];
+
+
+    for (int i = 1; i < 50; i++)
+    {
+        if (partile_pos[i].x == 0 || partile_pos[i].y == 0)
+        {
+            partile_pos[i].x = rand() % (int)screen_size.x + 1;
+            partile_pos[i].y = 15.f;
+            partile_speed[i] = 1 + rand() % 25;
+            partile_radius[i] = rand() % 4;
+
+            partile_target_pos[i].x = rand() % (int)screen_size.x;
+            partile_target_pos[i].y = screen_size.y * 2;
+        }
+
+        partile_pos[i] = ImLerp(partile_pos[i], partile_target_pos[i], ImGui::GetIO().DeltaTime * (partile_speed[i] / 60));
+
+        if (partile_pos[i].y > screen_size.y)
+        {
+            partile_pos[i].x = 0;
+            partile_pos[i].y = 0;
+        }
+
+        ImGui::GetWindowDrawList()->AddCircleFilled(partile_pos[i], partile_radius[i], ImColor(255,255,255, 255/2));
+    }
+
+}
+	
+    void BeginDraw() {
+    
+                     
+                    
+                    // Menu 1
+                    // Menu 1
+                    // Menu 1
+                    // Menu 1
+
+                    if (isMenuUi == 1) {
+                    ImGui::SetNextWindowSize(ImVec2(1088, 755));
+                    static bool p_open = true;
+                    auto mareetg0 = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse /* + ImGuiWindowFlags_NoTitleBar*/;
+                    char buf[128];
+                    sprintf(buf, (OBFUSCATE("MUMMY CHEAT PUBG MOBILE 3.1.0")), ImGui::GetFrameCount());
+                    ImGui::Begin(buf, &show,mareetg0);
+                    g_window = ImGui::GetCurrentWindow();	      
+                    Particles();
+                    ImGui::SetCursorPos(ImVec2(14 , 55));
+                    ImGui::BeginChild(1, ImVec2(213 , 675), true);
+                    
+                    if (ImGui::Button(ICON_FA_HOME"", /*ImVec2(160.5 - 6, 45)*/ ImVec2(170.5 - 6, 60)))
+                    Settings::Tab = 1;
+                    
+                    ImGui::Spacing();ImGui::Spacing();
+                    
+                    if (ImGui::Button(ICON_FA_EYE"", ImVec2(170.5 - 6, 60)))
+                    Settings::Tab = 2;
+                    
+                    ImGui::Spacing();ImGui::Spacing();
+                    
+                    if (ImGui::Button(ICON_FA_CROSSHAIRS"", ImVec2(170.5 - 6, 60)))
+                    Settings::Tab = 3;
+                    
+                    ImGui::Spacing();ImGui::Spacing();
+                  
+                    if (ImGui::Button(ICON_FA_GLOBE"", ImVec2(170.5 - 6, 60)))
+                    Settings::Tab = 4;
+                    
+                    ImGui::Spacing();ImGui::Spacing();
+                        
+                    if (ImGui::Button(ICON_FA_LIST"", ImVec2(170.5 - 6, 60)))
+                    Settings::Tab = 5;
+                    
+                    ImGui::EndChild();
+                    
+                    
+                    ImGui::SetCursorPos(ImVec2(253 , 55));
+                    ImGui::BeginChild(2, ImVec2(823 , 675), true);
+                    
+                    if (Settings::Tab == 1) {
+                    ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
+                    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
+                    ImGui::BeginChild("hdkdbfk ff#1", ImVec2(0, 0), true);
+                    ImGui::PopStyleVar(2);
+                    static bool blinkState = true;
+                    static float blinkTimer = 0.0f;
+                    blinkTimer += ImGui::GetIO().DeltaTime;
+                    if (blinkTimer > 0.5f)
+                    {
+                        blinkState = !blinkState;
+                        blinkTimer = 0.0f;
+                    }
+                    ImVec4 ballColor = blinkState ? ImVec4(1.0f, 0.0f, 0.0f, 1.0f) : ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+                    
+                    ImGui::RadioButton("Menu Ui 1", &isMenuUi, 1);
+                    ImGui::SameLine();
+                    ImGui::RadioButton("Menu Ui 2", &isMenuUi, 2);
+                    ImGui::Separator();
+                    ImGui::BulletText("Welcome To Mymmu Cheat 32 Bit | Update 3.2.0");
+                    ImGui::Separator();
+                    ImGui::BulletText("[#] Change logs");
+                    ImGui::BulletText("[+] improved Aim Prediction");
+                    ImGui::BulletText("[+] improved Memory Hack");
+                    ImGui::BulletText("[+] improved World Esp");
+                    ImGui::BulletText("[+] improved 2 Esp Ui");
+                    ImGui::BulletText("[+] improved Items Esp");
+                    ImGui::BulletText("[+] improved Edit Menu");
+                    ImGui::Separator();
+                    ImGui::BulletText("Devloper Owner @HTTPS_ESLAM");
+                    ImGui::BulletText("Telegram Channel @HTTPS_MUMMY");
+                    }
+                    /*____________________________________________*/
+                    if (Settings::Tab == 2) {
+                    ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
+                    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
+                    ImGui::BeginChild("hdkdbfk ff#1", ImVec2(0, 0), true);
+                    ImGui::PopStyleVar(2);
+                    
+                    ImGui::RadioButton("Esp Ui 1", &isESPUi, 1);
+                    ImGui::SameLine();
+                    ImGui::RadioButton("Esp Ui 2", &isESPUi, 2);
+                    ImGui::SameLine();
+                    ImGui::Text(" | ");
+                    ImGui::SameLine();
+                    ImGui::RadioButton("Line 180°", &isLineUi, 2);
+                    
+                    ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // لون أبيض غامق
+                    ImGui::Separator();
+                    ImGui::PopStyleColor();
+                    
+                    ImGui::Checkbox("Enable Esp", &isInfo);
+                    ImGui::TableNextColumn();
+                    ImGui::Checkbox("Line", &isLine);
+                    ImGui::TableNextColumn();
+                    ImGui::Checkbox("Bone", &isBone);
+                    ImGui::TableNextColumn();
+                    ImGui::Checkbox("Box 3D", &isBox3D);
+                    ImGui::TableNextColumn();
+                    ImGui::Checkbox("Grenade", &isGrenade);
+                    ImGui::TableNextColumn();
+                    ImGui::Checkbox("360° Alert", &isAlert);
+                    ImGui::TableNextColumn();
+                    
+                    }
+                    /*____________________________________________*/                  
+                    if (Settings::Tab == 3) {
+                    ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
+                    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
+                    ImGui::BeginChild("hdkdbfk ff#1", ImVec2(0, 0), true);
+                    ImGui::PopStyleVar(2);
+                    
+                    ImGui::Checkbox("Enable AimBot", &isAimbot);
+                    ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // لون أبيض غامق
+                    ImGui::Separator();
+                    ImGui::PopStyleColor();
+                    
+                    if (isAimbot == false) {
+                    ImGui::BeginDisabled();
+                    }
+                    ImGui::Spacing();ImGui::Spacing();
+                    ImGui::Checkbox("VisCheck", &isVisCheck);
+                    ImGui::SameLine();
+                    ImGui::Checkbox("Aim-Line", &isAimLine);
+                    
+                    //aimbot recoil
+                    ImGui::Text("AimBot-Recoil");
+                    ImGui::Text("%.2f", isAimRecoil);
+                    ImGui::SliderFloat("#1", &isAimRecoil, 0, 1.0);
+                    //end aimbot recoil
+                    ImGui::Spacing();ImGui::Spacing();
+                    //fov
+                    ImGui::Text("Fov-Size");
+                    ImGui::Text("%.0f", isFovSize);
+                    ImGui::SliderFloat("#2", &isFovSize, 0, 145);
+                    //end fov
+                    
+                    //aim dist
+                    ImGui::Text("Aim-Distance");
+                    ImGui::Text("%.0fM", isAimDistance);
+                    ImGui::SliderFloat("#3", &isAimDistance, 0, 270);
+                    //end aim dist
+                    
+                    ImGui::RadioButton("None", &isAimTrigger, 1);
+                    ImGui::SameLine();
+                    ImGui::RadioButton("Shooting", &isAimTrigger, 2);
+                    ImGui::SameLine();
+                    ImGui::RadioButton("Scoping", &isAimTrigger, 3);
+                    if (isAimbot == false) {
+                    ImGui::EndDisabled();
+                    }
+                    }
+                   /*____________________________________________*/
+                    if (Settings::Tab == 4) {
+                    ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
+                    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
+                    ImGui::BeginChild("hdkdbfk ff#1", ImVec2(0, 0), true);
+                    ImGui::PopStyleVar(2);
+                    
+                    ImGui::TableNextColumn();
+                    ImGui::Checkbox("Car", &isCars);
+                    ImGui::TableNextColumn();
+                    ImGui::Checkbox("Dead Box", &isBox);
+                    ImGui::TableNextColumn();
+                    ImGui::Checkbox("Dead Box Item", &isBoxItems);
+
+                    }
+                    
+                    /*____________________________________________*/
+                    if (Settings::Tab == 5) {
+                    ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
+                    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
+                    ImGui::BeginChild("hdkdbfk ff#1", ImVec2(0, 0), true);
+                    ImGui::PopStyleVar(2);
+                    
+                    items_data = json::parse(JSON_ITEMS);
+                    for (auto &i : items_data) {
+                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(102, 196, 255, 255));
+                    ImGui::BulletText(i["Category"].get<std::string>().c_str());
+                    ImGui::PopStyleColor();
+                    ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // لون أبيض غامق
+                    ImGui::Separator();
+                    ImGui::PopStyleColor();
+                    if (ImGui::BeginTable("split", 3)) {
+                    for (auto &item : i["Items"]) {
+                    ImGui::TableNextColumn();
+                    ImGui::Checkbox(item["itemName"].get<std::string>().c_str(), (bool *)&Items[item["itemId"].get<int>()]);
+                    }
+                    ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // لون أبيض غامق
+                    ImGui::Separator();
+                    ImGui::PopStyleColor();
+                    ImGui::EndTable();
+                    }}
+                    
+                    ImGui::EndChild();
+                    }}
+                    
+
+                    // Menu 2
+                    // Menu 2
+                    // Menu 2
+                    // Menu 2
+                    
+       	            if (isMenuUi == 2) {
+       	            ImGui::SetNextWindowSize(ImVec2(960.737, 815.104));
+                    static bool p_open = true;
+                    auto mareetg0 = ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse /* + ImGuiWindowFlags_NoTitleBar*/;
+                    char buf[128];
+                    sprintf(buf, (OBFUSCATE("MUMMY CHEAT PUBG MOBILE 3.1.0")), ImGui::GetFrameCount());
+                    ImGui::Begin(buf, &show,mareetg0);
+                    g_window = ImGui::GetCurrentWindow();	      
+                    
+                    if (ImGui::Button(ICON_FA_HOME" Home", /*ImVec2(160.5 - 6, 45)*/ ImVec2(170.5 - 6, 60)))
+                        Settings::Tab = 1;
+                    ImGui::SameLine();
+                    if (ImGui::Button(ICON_FA_EYE" Visual", ImVec2(170.5 - 6, 60)))
+                        Settings::Tab = 2;
+                    ImGui::SameLine();
+                    if (ImGui::Button(ICON_FA_CROSSHAIRS" Aim", ImVec2(170.5 - 6, 60)))
+                        Settings::Tab = 3;
+
+                    ImGui::SameLine();
+                    if (ImGui::Button(ICON_FA_GLOBE" World", ImVec2(170.5 - 6, 60)))
+                        Settings::Tab = 4;
+                        
+                    ImGui::SameLine();
+                    if (ImGui::Button(ICON_FA_LIST" Items", ImVec2(170.5 - 6, 60)))
+                        Settings::Tab = 5;
+                        
+                    Particles();
+                    ImGui::Separator();              
+                    
+       	                if (Settings::Tab == 1) {
+                        ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
+                        ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
+                        ImGui::BeginChild("hdkdbfk ff#1", ImVec2(0, 0), true);
+                        ImGui::PopStyleVar(2);
+                        static bool blinkState = true;
+                        static float blinkTimer = 0.0f;
+                        blinkTimer += ImGui::GetIO().DeltaTime;
+                        if (blinkTimer > 0.5f)
+                        {
+                            blinkState = !blinkState;
+                            blinkTimer = 0.0f;
+                        }
+                        ImVec4 ballColor = blinkState ? ImVec4(1.0f, 0.0f, 0.0f, 1.0f) : ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+                        
+                        ImGui::RadioButton("Menu Ui 1", &isMenuUi, 1);
+                        ImGui::SameLine();
+                        ImGui::RadioButton("Menu Ui 2", &isMenuUi, 2);
+                        ImGui::Separator();
+                        ImGui::BulletText("Welcome To Mymmu Cheat 32 Bit | Update 3.2.0");
+                        ImGui::Separator();
+                     //   ImGui::BulletText("[#] Change logs");
+                        ImGui::BulletText("[+] improved Aim Prediction");
+                     //   ImGui::BulletText("[+] improved Memory Hack");
+                        ImGui::BulletText("[+] improved World Esp");
+                        ImGui::BulletText("[+] improved 2 Esp Ui");
+                        ImGui::BulletText("[+] improved Items Esp");
+                        ImGui::BulletText("[+] improved Edit Menu");
+                        ImGui::Separator();
+                        ImGui::BulletText("Devloper Owner @HTTPS_ESLAM");
+                        ImGui::BulletText("Telegram Channel @HTTPS_MUMMY");
+                        }
+                    /*____________________________________________*/
+                        if (Settings::Tab == 2) {
+                        ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
+                        ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
+                        ImGui::BeginChild("hdkdbfk ff#1", ImVec2(0, 0), true);
+                        ImGui::PopStyleVar(2);
+                        
+                        ImGui::RadioButton("Esp Ui 1", &isESPUi, 1);
+                        ImGui::SameLine();
+                        ImGui::RadioButton("Esp Ui 2", &isESPUi, 2);
+                        ImGui::SameLine();
+                        ImGui::Text(" | ");
+                        ImGui::SameLine();
+                        ImGui::RadioButton("Line 360°", &isLineUi, 1);
+                        ImGui::SameLine();
+                        ImGui::RadioButton("Line 180°", &isLineUi, 2);
+                        
+                        ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // لون أبيض غامق
+                        ImGui::Separator();
+                        ImGui::PopStyleColor();
+                        
+                        ImGui::Checkbox("Enable Esp", &isInfo);
+                        ImGui::TableNextColumn();
+                        ImGui::Checkbox("Line", &isLine);
+                        ImGui::TableNextColumn();
+                        ImGui::Checkbox("Bone", &isBone);
+                        ImGui::TableNextColumn();
+                        ImGui::Checkbox("Box 3D", &isBox3D);
+                        ImGui::TableNextColumn();
+                        ImGui::Checkbox("Grenade", &isGrenade);
+                        ImGui::TableNextColumn();
+                        ImGui::Checkbox("360° Alert", &isAlert);
+                        ImGui::TableNextColumn();
+                        
+                        }
+                    /*____________________________________________*/                  
+                        if (Settings::Tab == 3) {
+                        ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
+                        ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
+                        ImGui::BeginChild("hdkdbfk ff#1", ImVec2(0, 0), true);
+                        ImGui::PopStyleVar(2);
+                        
+                        ImGui::Checkbox("Enable AimBot", &isAimbot);
+                        ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // لون أبيض غامق
+                        ImGui::Separator();
+                        ImGui::PopStyleColor();
+                        
+                        if (isAimbot == false) {
+                        ImGui::BeginDisabled();
+                        }
+                        ImGui::Spacing();ImGui::Spacing();
+                        ImGui::Checkbox("VisCheck", &isVisCheck);
+                        ImGui::SameLine();
+                        ImGui::Checkbox("Aim-Line", &isAimLine);
+                        
+                        //aimbot recoil
+                        ImGui::Text("AimBot-Recoil");
+                        ImGui::Text("%.2f", isAimRecoil);
+                        ImGui::SliderFloat("#1", &isAimRecoil, 0, 1.0);
+                        //end aimbot recoil
+                        ImGui::Spacing();ImGui::Spacing();
+                        //fov
+                        ImGui::Text("Fov-Size");
+                        ImGui::Text("%.0f", isFovSize);
+                        ImGui::SliderFloat("#2", &isFovSize, 0, 145);
+                        //end fov
+                        
+                        //aim dist
+                        ImGui::Text("Aim-Distance");
+                        ImGui::Text("%.0fM", isAimDistance);
+                        ImGui::SliderFloat("#3", &isAimDistance, 0, 270);
+                        //end aim dist
+                        
+                        ImGui::RadioButton("None", &isAimTrigger, 1);
+                        ImGui::SameLine();
+                        ImGui::RadioButton("Shooting", &isAimTrigger, 2);
+                        ImGui::SameLine();
+                        ImGui::RadioButton("Scoping", &isAimTrigger, 3);
+                        ImGui::SameLine();
+                        ImGui::RadioButton("Both", &isAimTrigger, 4);
+                        if (isAimbot == false) {
+                        ImGui::EndDisabled();
+                        }
+                        }
+                    /*____________________________________________*/
+                    if (Settings::Tab == 4) {
+                        ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
+                        ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
+                        ImGui::BeginChild("hdkdbfk ff#1", ImVec2(0, 0), true);
+                        ImGui::PopStyleVar(2);
+                        
+                        ImGui::TableNextColumn();
+                        ImGui::Checkbox("Car", &isCars);
+                        ImGui::TableNextColumn();
+                        ImGui::Checkbox("Dead Box", &isBox);
+                        ImGui::TableNextColumn();
+                        ImGui::Checkbox("Dead Box Item", &isBoxItems);
+
+                        }
+                        
+                    /*____________________________________________*/
+                    if (Settings::Tab == 5) {
+                        ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
+                        ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
+                        ImGui::BeginChild("hdkdbfk ff#1", ImVec2(0, 0), true);
+                        ImGui::PopStyleVar(2);
+                        
+                        items_data = json::parse(JSON_ITEMS);
+                        for (auto &i : items_data) {
+                        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(102, 196, 255, 255));
+                        ImGui::BulletText(i["Category"].get<std::string>().c_str());
+                        ImGui::PopStyleColor();
+                        ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // لون أبيض غامق
+                        ImGui::Separator();
+                        ImGui::PopStyleColor();
+                        if (ImGui::BeginTable("split", 3)) {
+                        for (auto &item : i["Items"]) {
+                        ImGui::TableNextColumn();
+                        ImGui::Checkbox(item["itemName"].get<std::string>().c_str(), (bool *)&Items[item["itemId"].get<int>()]);
+                        }
+                        ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // لون أبيض غامق
+                        ImGui::Separator();
+                        ImGui::PopStyleColor();
+                        ImGui::EndTable();
+                        }}
+    
+                        }}}
+	
+void EndDraw()
+{
+	ImGuiWindow* window =  ImGui::GetCurrentWindow();
+	window->DrawList->PushClipRectFullScreen();
+	ImGui::End();
+}
+
+JNIEXPORT void JNICALL
+Java_com_xelahot_pubgm_GLES3JNIView_step(JNIEnv* env, jobject obj) {
+	ImGuiIO& io = ImGui::GetIO();
+	
+	static bool show_demo_window = false;
+    static bool show_MainMenu_window = true;
+
+	// Start the Dear ImGui frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplAndroid_NewFrame(glWidth, glHeight);
+    ImGui::NewFrame();
+	
+    // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+	if (show_demo_window) {
+    ImGui::ShowDemoWindow(&show_demo_window);
+	}
+	
+	if (show) {
+	BeginDraw();
+	}else{
+	}
+	
+	if (show == false){
+	if (ImGui::Begin(OBFUSCATE(" open" ), 0,ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoMove)) {
+    g_window = ImGui::GetCurrentWindow();   
+    if(ImGui::InvisibleButton("open", ImVec2(100, 100) )) {
+    show = true;
+    }
+	ImGui::End();
+	}
+	}
+	
+	if (isShowSkin) {
+	show = false;
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.f);
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.f);
+	ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+	ImGui::SetNextWindowSize(ImVec2(790.0, 1000.0));
+	ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+	ImGui::Begin("Mummy Cheat (SKIN MENU)", &isShowSkin, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove); {
+	g_window = ImGui::GetCurrentWindow();
+	ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, IM_COL32(0, 0, 0, 0));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, IM_COL32(0, 0, 0, 0));
+	
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor();
+	ImGui::End();
+	}
+    }
+	
+	//EndDraw();
+	
+	//Rendering Notify
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.f);
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.10f, 0.10f, 0.10f, 1.00f)); 
+    ImGui::RenderNotifications();
+    ImGui::PopStyleVar(2);
+    ImGui::PopStyleColor(1);
+	
+    ImGui::Render();
+	glClear(GL_COLOR_BUFFER_BIT);
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	
+}
+
+JNIEXPORT void JNICALL Java_com_xelahot_pubgm_GLES3JNIView_imgui_Shutdown(JNIEnv* env, jobject obj){
+    if (!g_Initialized)
+        return;
+     // Cleanup
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplAndroid_Shutdown();
+    ImGui::DestroyContext();
+    g_Initialized=false;
+}
+
+JNIEXPORT void JNICALL Java_com_xelahot_pubgm_GLES3JNIView_MotionEventClick(JNIEnv* env, jobject obj,jboolean down,jfloat PosX,jfloat PosY){
+	ImGuiIO & io = ImGui::GetIO();
+	io.MouseDown[0] = down;
+	io.MousePos = ImVec2(PosX,PosY);
+}
+
+JNIEXPORT jstring JNICALL Java_com_xelahot_pubgm_GLES3JNIView_getWindowRect(JNIEnv *env, jobject thiz) {
+    // TODO: 实现 getWindowSizePos()
+    char result[256]="0|0|0|0";
+    if(g_window){
+        sprintf(result,"%d|%d|%d|%d",(int)g_window->Pos.x,(int)g_window->Pos.y,(int)g_window->Size.x,(int)g_window->Size.y);
+    }
+    return env->NewStringUTF(result);
+}
+
+// ======================================================================== //
+
+void *(*oProcessEvent)(UObject *pObj, UFunction *pFunc, void *pArgs);
+void *hkProcessEvent(UObject *pObj, UFunction *pFunc, void *pArgs) {
+    if (pFunc) {
+        if (pFunc->GetFullName() == "Function Engine.HUD.ReceiveDrawHUD") {
+            AHUD *pHUD = (AHUD *)pObj;
+            if (pHUD) {
+                auto Params = (AHUD_ReceiveDrawHUD_Params *)pArgs;
+                if (Params) {
+                    RenderESP(pHUD, Params->SizeX, Params->SizeY);
+                }
+            }
+        }
+    }
+    return oProcessEvent(pObj, pFunc, pArgs);
+}
+
+#define SLEEP_TIME 1000LL / 60LL
+[[noreturn]] 
+void *maps_thread(void *) {
+    while (true) {
+    auto t1 = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
+    std::vector<sRegion> tmp;
+    char line[512];
+        FILE *f = fopen("/proc/self/maps", "r");
+        if (f)
+        {
+            while (fgets(line, sizeof line, f))
+            {
+                uintptr_t start, end;
+                char tmpProt[16];
+                if (sscanf(line, "%" PRIXPTR "-%" PRIXPTR " %16s %*s %*s %*s %*s", &start, &end, tmpProt) > 0)
+                {
+                    if (tmpProt[0] != 'r')
+                    {
+                        tmp.push_back({start, end});
+                    }
+                }
+            }
+            fclose(f);
+        }
+    trapRegions = tmp;
+
+        auto td = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() - t1;
+        std::this_thread::sleep_for(std::chrono::milliseconds(std::max(std::min(0LL, SLEEP_TIME - td), SLEEP_TIME)));
+    }
+}//end thread
+
+// ======================================================================== //
+void *main_thread(void *) {
+       
+        UE4 = Tools::GetBaseAddress("libUE4.so");
+        while (!UE4){
+        UE4 = Tools::GetBaseAddress("libUE4.so");
+        sleep(1);
+		}
+		
+        while (!g_App){
+        g_App = *(android_app **) (UE4 + GNativeAndroidApp);
+        sleep(1);
+		}
+		
+		FName::GNames = GetGNames();
+        while (!FName::GNames) {
+        FName::GNames = GetGNames();
+        sleep(1);
+        }
+		
+		// if (bValid) {
+		// PlaySoundYaserMod(LOGIN.c_str());
+		// }
+		
+        DobbyHook(reinterpret_cast<void*>(UE4 + ProcessEvent),reinterpret_cast<void*>(hkProcessEvent),reinterpret_cast<void**>(&oProcessEvent));
+        UObject::GUObjectArray = (FUObjectArray *)(UE4 + GUObject_Offset);
+        
+        bScanPatternCompleted = true;
+        
+        pthread_t t;
+        pthread_create(&t, 0, maps_thread, 0);
+		items_data = json::parse(JSON_ITEMS);
+        return 0;
+    }
+
+
+
+const char *GetAndroidID(JNIEnv *env, jobject context) {
+    jclass contextClass = env->FindClass(/*android/content/Context*/ StrEnc("`L+&0^[S+-:J^$,r9q92(as", "\x01\x22\x4F\x54\x5F\x37\x3F\x7C\x48\x42\x54\x3E\x3B\x4A\x58\x5D\x7A\x1E\x57\x46\x4D\x19\x07", 23).c_str());
+    jmethodID getContentResolverMethod = env->GetMethodID(contextClass, /*getContentResolver*/ StrEnc("E8X\\7r7ys_Q%JS+L+~", "\x22\x5D\x2C\x1F\x58\x1C\x43\x1C\x1D\x2B\x03\x40\x39\x3C\x47\x3A\x4E\x0C", 18).c_str(), /*()Landroid/content/ContentResolver;*/ StrEnc("8^QKmj< }5D:9q7f.BXkef]A*GYLNg}B!/L", "\x10\x77\x1D\x2A\x03\x0E\x4E\x4F\x14\x51\x6B\x59\x56\x1F\x43\x03\x40\x36\x77\x28\x0A\x08\x29\x24\x44\x33\x0B\x29\x3D\x08\x11\x34\x44\x5D\x77", 35).c_str());
+    jclass settingSecureClass = env->FindClass(/*android/provider/Settings$Secure*/ StrEnc("T1yw^BCF^af&dB_@Raf}\\FS,zT~L(3Z\"", "\x35\x5F\x1D\x05\x31\x2B\x27\x69\x2E\x13\x09\x50\x0D\x26\x3A\x32\x7D\x32\x03\x09\x28\x2F\x3D\x4B\x09\x70\x2D\x29\x4B\x46\x28\x47", 32).c_str());
+    jmethodID getStringMethod = env->GetStaticMethodID(settingSecureClass, /*getString*/ StrEnc("e<F*J5c0Y", "\x02\x59\x32\x79\x3E\x47\x0A\x5E\x3E", 9).c_str(), /*(Landroid/content/ContentResolver;Ljava/lang/String;)Ljava/lang/String;*/ StrEnc("$6*%R*!XO\"m18o,0S!*`uI$IW)l_/_knSdlRiO1T`2sH|Ouy__^}%Y)JsQ:-\"(2_^-$i{?H", "\x0C\x7A\x4B\x4B\x36\x58\x4E\x31\x2B\x0D\x0E\x5E\x56\x1B\x49\x5E\x27\x0E\x69\x0F\x1B\x3D\x41\x27\x23\x7B\x09\x2C\x40\x33\x1D\x0B\x21\x5F\x20\x38\x08\x39\x50\x7B\x0C\x53\x1D\x2F\x53\x1C\x01\x0B\x36\x31\x39\x46\x0C\x15\x43\x2B\x05\x30\x15\x41\x43\x46\x55\x70\x0D\x59\x56\x00\x15\x58\x73", 71).c_str());
+
+    auto obj = env->CallObjectMethod(context, getContentResolverMethod);
+    auto str = (jstring) env->CallStaticObjectMethod(settingSecureClass, getStringMethod, obj, env->NewStringUTF(/*android_id*/ StrEnc("ujHO)8OfOE", "\x14\x04\x2C\x3D\x46\x51\x2B\x39\x26\x21", 10).c_str()));
+    return env->GetStringUTFChars(str, 0);
+}
+
+const char *GetDeviceModel(JNIEnv *env) {
+    jclass buildClass = env->FindClass(/*android/os/Build*/ StrEnc("m5I{GKGWBP-VOxkA", "\x0C\x5B\x2D\x09\x28\x22\x23\x78\x2D\x23\x02\x14\x3A\x11\x07\x25", 16).c_str());
+    jfieldID modelId = env->GetStaticFieldID(buildClass, /*MODEL*/ StrEnc("|}[q:", "\x31\x32\x1F\x34\x76", 5).c_str(), /*Ljava/lang/String;*/ StrEnc(".D:C:ETZ1O-Ib&^h.Y", "\x62\x2E\x5B\x35\x5B\x6A\x38\x3B\x5F\x28\x02\x1A\x16\x54\x37\x06\x49\x62", 18).c_str());
+
+    auto str = (jstring) env->GetStaticObjectField(buildClass, modelId);
+    return env->GetStringUTFChars(str, 0);
+}
+
+const char *GetDeviceBrand(JNIEnv *env) {
+    jclass buildClass = env->FindClass(/*android/os/Build*/ StrEnc("0iW=2^>0zTRB!B90", "\x51\x07\x33\x4F\x5D\x37\x5A\x1F\x15\x27\x7D\x00\x54\x2B\x55\x54", 16).c_str());
+    jfieldID modelId = env->GetStaticFieldID(buildClass, /*BRAND*/ StrEnc("@{[FP", "\x02\x29\x1A\x08\x14", 5).c_str(), /*Ljava/lang/String;*/ StrEnc(".D:C:ETZ1O-Ib&^h.Y", "\x62\x2E\x5B\x35\x5B\x6A\x38\x3B\x5F\x28\x02\x1A\x16\x54\x37\x06\x49\x62", 18).c_str());
+
+    auto str = (jstring) env->GetStaticObjectField(buildClass, modelId);
+    return env->GetStringUTFChars(str, 0);
+}
+
+const char *GetPackageName(JNIEnv *env, jobject context) {
+    jclass contextClass = env->FindClass(/*android/content/Context*/ StrEnc("`L+&0^[S+-:J^$,r9q92(as", "\x01\x22\x4F\x54\x5F\x37\x3F\x7C\x48\x42\x54\x3E\x3B\x4A\x58\x5D\x7A\x1E\x57\x46\x4D\x19\x07", 23).c_str());
+    jmethodID getPackageNameId = env->GetMethodID(contextClass, /*getPackageName*/ StrEnc("YN4DaP)!{wRGN}", "\x3E\x2B\x40\x14\x00\x33\x42\x40\x1C\x12\x1C\x26\x23\x18", 14).c_str(), /*()Ljava/lang/String;*/ StrEnc("VnpibEspM(b]<s#[9cQD", "\x7E\x47\x3C\x03\x03\x33\x12\x5F\x21\x49\x0C\x3A\x13\x20\x57\x29\x50\x0D\x36\x7F", 20).c_str());
+
+    auto str = (jstring) env->CallObjectMethod(context, getPackageNameId);
+    return env->GetStringUTFChars(str, 0);
+}
+
+const char *GetDeviceUniqueIdentifier(JNIEnv *env, const char *uuid) {
+    jclass uuidClass = env->FindClass(/*java/util/UUID*/ StrEnc("B/TxJ=3BZ_]SFx", "\x28\x4E\x22\x19\x65\x48\x47\x2B\x36\x70\x08\x06\x0F\x3C", 14).c_str());
+
+    auto len = strlen(uuid);
+
+    jbyteArray myJByteArray = env->NewByteArray(len);
+    env->SetByteArrayRegion(myJByteArray, 0, len, (jbyte *) uuid);
+
+    jmethodID nameUUIDFromBytesMethod = env->GetStaticMethodID(uuidClass, /*nameUUIDFromBytes*/ StrEnc("P6LV|'0#A+zQmoat,", "\x3E\x57\x21\x33\x29\x72\x79\x67\x07\x59\x15\x3C\x2F\x16\x15\x11\x5F", 17).c_str(), /*([B)Ljava/util/UUID;*/ StrEnc("sW[\"Q[W3,7@H.vT0) xB", "\x5B\x0C\x19\x0B\x1D\x31\x36\x45\x4D\x18\x35\x3C\x47\x1A\x7B\x65\x7C\x69\x3C\x79", 20).c_str());
+    jmethodID toStringMethod = env->GetMethodID(uuidClass, /*toString*/ StrEnc("2~5292eW", "\x46\x11\x66\x46\x4B\x5B\x0B\x30", 8).c_str(), /*()Ljava/lang/String;*/ StrEnc("P$BMc' #j?<:myTh_*h0", "\x78\x0D\x0E\x27\x02\x51\x41\x0C\x06\x5E\x52\x5D\x42\x2A\x20\x1A\x36\x44\x0F\x0B", 20).c_str());
+
+    auto obj = env->CallStaticObjectMethod(uuidClass, nameUUIDFromBytesMethod, myJByteArray);
+    auto str = (jstring) env->CallObjectMethod(obj, toStringMethod);
+    return env->GetStringUTFChars(str, 0);
+}
+
+#include <curl/curl.h>
+
+struct MemoryStruct {
+    char *memory;
+    size_t size;
+};
+
+static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp) {
+    size_t realsize = size * nmemb;
+    struct MemoryStruct *mem = (struct MemoryStruct *) userp;
+
+    mem->memory = (char *) realloc(mem->memory, mem->size + realsize + 1);
+    if (mem->memory == NULL) {
+        return 0;
+    }
+
+    memcpy(&(mem->memory[mem->size]), contents, realsize);
+    mem->size += realsize;
+    mem->memory[mem->size] = 0;
+
+    return realsize;
+}
+
+//#include "LicenseTools.h"
+
+void native_Init(JNIEnv *env, jclass clazz, jobject mContext) {
+    // szToast = "Modded by Kuroyama\nTelegram: @KuroHackOfficial"
+    char szToast[47] = {0x28, 0x08, 0x05, 0x07, 0x08, 0x0B, 0x51, 0x11,
+                        0x2C, 0x57, 0x3E, 0x26, 0x2B, 0x20, 0x38, 0x22,
+                        0x28, 0x26, 0x8F, 0x57, 0x28, 0x33, 0x2C, 0x2C,
+                        0x43, 0x36, 0x3C, 0x91, 0x7D, 0x5F, 0x66, 0x4E,
+                        0x53, 0x48, 0x71, 0x4A, 0x4A, 0x54, 0x72, 0x4D,
+                        0x4F, 0x5E, 0x56, 0x62, 0x5C, 0x63, 0xC1};
+
+    for (unsigned int oywdm = 0, SmnWs = 0; oywdm < 47; oywdm++) {
+        SmnWs = szToast[oywdm];
+        SmnWs++;
+        SmnWs -= oywdm;
+        SmnWs++;
+        SmnWs -= oywdm;
+        SmnWs ^= 0x67;
+        szToast[oywdm] = SmnWs;
+    }
+
+    jstring pMsg = env->NewStringUTF(szToast);
+
+
+
+
+
+    jclass toastClass = env->FindClass(/*android/widget/Toast*/ StrEnc("eCS7dp(}Z:2f/$i/S'CO", "\x04\x2D\x37\x45\x0B\x19\x4C\x52\x2D\x53\x56\x01\x4A\x50\x46\x7B\x3C\x46\x30\x3B", 20).c_str());
+    jmethodID makeTextMethod = env->GetStaticMethodID(toastClass, /*makeText*/ StrEnc("jI/4d64U", "\x07\x28\x44\x51\x30\x53\x4C\x21", 8).c_str(), /*(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;*/ StrEnc("H#L{!#l1/A\"2Z.X>f@XyZ3A*Za^XIT6&u0^zeYt%go5U[V!{X6(RXl>-!sFl9cE(l^[%f\\a2XM", "\x60\x6F\x2D\x15\x45\x51\x03\x58\x4B\x6E\x41\x5D\x34\x5A\x3D\x50\x12\x6F\x1B\x16\x34\x47\x24\x52\x2E\x5A\x12\x32\x28\x22\x57\x09\x19\x51\x30\x1D\x4A\x1A\x1C\x44\x15\x3C\x50\x24\x2E\x33\x4F\x18\x3D\x0D\x61\x7B\x14\x0D\x50\x49\x53\x1C\x2F\x08\x16\x14\x2C\x4C\x0B\x3B\x2F\x0A\x32\x33\x00\x41\x2C\x76", 74).c_str());
+
+    jobject toastObj = env->CallStaticObjectMethod(toastClass, makeTextMethod, mContext, pMsg, 0);
+
+    // jmethodID methodShow = env->GetMethodID(toastClass, /*show*/ StrEnc("!;N9", "\x52\x53\x21\x4E", 4).c_str(), /*()V*/ StrEnc("U*9", "\x7D\x03\x6F", 3).c_str());
+    // env->CallVoidMethod(toastObj, methodShow);
+
+    auto pkgName = GetPackageName(env, mContext);
+
+    //StartRuntimeHook(pkgName);
+}
+
+
+jstring native_Check(JNIEnv *env, jclass clazz, jobject mContext, jstring mUserKey) {
+    auto userKey = env->GetStringUTFChars(mUserKey, 0);
+
+    std::string hwid = userKey;
+    hwid += GetAndroidID(env, mContext);
+    hwid += GetDeviceModel(env);
+    hwid += GetDeviceBrand(env);
+
+    std::string UUID = GetDeviceUniqueIdentifier(env, hwid.c_str());
+
+    std::string errMsg;
+
+    struct MemoryStruct chunk{};
+    chunk.memory = (char *) malloc(1);
+    chunk.size = 0;
+
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+    if (curl) {
+
+
+        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, /*POST*/ StrEnc(",IL=", "\x7C\x06\x1F\x69", 4).c_str());
+
+        std::string sRedLink = OBFUSCATE("https://indkey.xyz/public/connect");
+		curl_easy_setopt(curl, CURLOPT_URL, sRedLink.c_str());
+
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, /*https*/ StrEnc("!mLBO", "\x49\x19\x38\x32\x3C", 5).c_str());
+        struct curl_slist *headers = NULL;
+        headers = curl_slist_append(headers, /*Content-Type: application/x-www-form-urlencoded*/ StrEnc("@;Ls\\(KP4Qrop`b#d3094/r1cf<c<=H)AiiBG6i|Ta66s2[", "\x03\x54\x22\x07\x39\x46\x3F\x7D\x60\x28\x02\x0A\x4A\x40\x03\x53\x14\x5F\x59\x5A\x55\x5B\x1B\x5E\x0D\x49\x44\x4E\x4B\x4A\x3F\x04\x27\x06\x1B\x2F\x6A\x43\x1B\x10\x31\x0F\x55\x59\x17\x57\x3F", 47).c_str());
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+        char data[4096];
+        sprintf(data, /*game=PUBG&user_key=%s&serial=%s*/ StrEnc("qu2yXK,YkJyGD@ut0.u~Nb'5(:.:chK", "\x16\x14\x5F\x1C\x65\x1B\x79\x1B\x2C\x6C\x0C\x34\x21\x32\x2A\x1F\x55\x57\x48\x5B\x3D\x44\x54\x50\x5A\x53\x4F\x56\x5E\x4D\x38", 31).c_str(), userKey, UUID.c_str());
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &chunk);
+
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+        res = curl_easy_perform(curl);
+        if (res == CURLE_OK) {
+            try {
+                json result = json::parse(chunk.memory);
+                if (result[/*status*/ StrEnc("(>_LBm", "\x5B\x4A\x3E\x38\x37\x1E", 6).c_str()] == true) {
+                    std::string token = result[/*data*/ StrEnc("fAVA", "\x02\x20\x22\x20", 4).c_str()][/*token*/ StrEnc("{>3Lr", "\x0F\x51\x58\x29\x1C", 5).c_str()].get<std::string>();
+                    time_t rng = result[/*data*/ StrEnc("fAVA", "\x02\x20\x22\x20", 4).c_str()][/*rng*/ StrEnc("+n,", "\x59\x00\x4B", 3).c_str()].get<time_t>();
+                    //exp_time = result[/*data*/ StrEnc("fAVA", "\x02\x20\x22\x20", 4).c_str()][/*EXP*/ StrEnc("V$1", "\x13\x7C\x61", 3).c_str()].get<std::string>();
+                    if (rng + 30 > time(0)) {
+                        std::string auth = /*PUBG*/ StrEnc("Q*) ", "\x01\x7F\x6B\x67", 4).c_str();;
+                        auth += "-";
+                        auth += userKey;
+                        auth += "-";
+                        auth += UUID;
+                        auth += "-";
+                        auth += /*Vm8Lk7Uj2JmsjCPVPVjrLa7zgfx3uz9E*/ StrEnc(OBFUSCATE("ZD$_K NtaM8Fu=n0fFyO;!Ae<H)*Gy4%"),OBFUSCATE("\x0C\x29\x1C\x13\x20\x17\x1B\x1E\x53\x07\x55\x35\x1F\x7E\x3E\x66\x36\x10\x13\x3D\x77\x40\x76\x1F\x5B\x2E\x51\x19\x32\x03\x0D\x60"), 32).c_str();
+                        std::string outputAuth = Tools::CalcMD5(auth);
+
+                        g_Token = token;
+                        g_Auth = outputAuth;
+                        
+                        bValid = g_Token == g_Auth;
+                        
+                        if (bValid) {
+                            pthread_t t;
+                            pthread_create(&t, NULL, main_thread, NULL);
+                            //pthread_create(&t, NULL, hack_thread, NULL);
+                        }
+                    }
+                } else {
+                    errMsg = result[/*reason*/ StrEnc("LW(3(c", "\x3E\x32\x49\x40\x47\x0D", 6).c_str()].get<std::string>();
+                }
+            } catch (json::exception &e) {
+                errMsg = "{";
+                errMsg += e.what();
+                errMsg += "}\n{";
+                errMsg += chunk.memory;
+                errMsg += "}";
+            }
+        } else {
+            errMsg = curl_easy_strerror(res);
+        }
+    }
+    curl_easy_cleanup(curl);
+    return bValid ? env->NewStringUTF(/*OK*/ StrEnc("8q", "\x77\x3A", 2).c_str()) : env->NewStringUTF(errMsg.c_str());
+}
+
+
+int Register2(JNIEnv *env) {
+    JNINativeMethod methods[] = {{OBFUSCATE("Init"),  "(Landroid/content/Context;)V",                   (void *) native_Init},
+                                 {OBFUSCATE("Check"), "(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;", (void *) native_Check}};
+
+    jclass clazz = env->FindClass(OBFUSCATE("com/xelahot/pubgm/Launcher"));
+    if (!clazz)
+        return -1;
+
+    if (env->RegisterNatives(clazz, methods, sizeof(methods) / sizeof(methods[0])) != 0)
+        return -1;
+
+    return 0;
+}
+
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
+    JNIEnv *env;
+    vm->GetEnv((void **) &env, JNI_VERSION_1_6);
+	
+
+    if (Register2(env) != 0)
+        return -1;
+
+    return JNI_VERSION_1_6;
+}
+
