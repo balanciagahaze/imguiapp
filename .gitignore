@@ -13,10 +13,9 @@ local.properties
 
 # NDK
 app/src/main/obj/
-app/src/main/libs/
-*.o
-*.so
-*.a
+# app/src/main/libs/  <-- We might want libs if they are prebuilt, but usually libs is output.
+# Let's keep obj ignored but allow .a and .so if they are source files (like in jni/curl)
+
 
 # Build intermediates
 app/build/intermediates/
