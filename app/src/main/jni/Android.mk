@@ -50,7 +50,7 @@ LOCAL_SRC_FILES 		:=  main.cpp \
 	Substrate/SubstratePosixMemory.cpp \
 	Substrate/SymbolFinder.cpp \
 	Substrate/base64.cpp \
-    Helper/tools.cpp \
+    Helper/Tools.cpp \
     Helper/ElfImg.cpp \
     Helper/fake_dlfcn.cpp \
     Helper/plthook_elf.cpp  \
